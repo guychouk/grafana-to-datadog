@@ -1,0 +1,56 @@
+* {
+  margin: 0;
+  padding: 0;
+}
+
+body {
+  tab-size: 4;
+  background: rgb(0,114,206);
+  background: linear-gradient(90deg, rgba(0,114,206,1) 0%, rgba(102,186,255,1) 100%);
+}
+
+.container {
+  margin: 15vh 13vw;
+  width: 75vw;
+  height: 70vh;
+  border-radius: 10px;
+  overflow: auto;
+}
+
+.container .json-output {
+  margin: 0;
+  border-radius: 10px;
+  font-family: "Fira Code", monospace;
+}
+
+.json-output.banner {
+  text-align: center;
+  font-size: 1.3em;
+}
+
+.toaster {
+    top: 1em;
+    right: 2em;
+    width: auto;
+    height: 50px;
+    position: fixed;
+    background: lightgreen;
+    color: black;
+    border-radius: 5px;
+    align-items: center;
+    font-family: "Arial";
+    opacity: 0;
+    -webkit-transition: opacity 0.3s ease-in-out;
+    -moz-transition: opacity 0.3s ease-in-out;
+    -ms-transition: opacity 0.3s ease-in-out;
+    -o-transition: opacity 0.3s ease-in-out;
+    transition: opacity 0.3 ease-in-out;
+}
+
+.toaster.fade-in {
+  opacity: 1;
+}
+
+.toaster > p {
+  padding: 1em 1em;
+}

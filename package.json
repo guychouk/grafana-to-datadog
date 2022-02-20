@@ -1,0 +1,24 @@
+{
+  "name": "grafana-to-datadog",
+  "version": "1.0.0",
+  "description": "convert Grafana dashboard JSON to Datadog dashboard",
+  "main": "index.js",
+  "scripts": {
+    "start": "http-server public",
+    "dev": "nodemon -w public --exec npm start",
+    "prettify": "prettier --write --ignore-unknown 'public'"
+  },
+  "keywords": [
+    "grafana",
+    "promql",
+    "peg.je",
+    "metrics"
+  ],
+  "author": "",
+  "license": "ISC",
+  "devDependencies": {
+    "http-server": "13.0.2",
+    "nodemon": "2.0.13",
+    "prettier": "2.4.1"
+  }
+}
