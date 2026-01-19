@@ -1,6 +1,6 @@
 # Grafana → Datadog
 
-This repository is the source code of [this](https://grafana-to-datadog.pages.dev/) simple website, **which is still a work in progress**.
+This repository is the source code of [this simple website](https://gtd.guycho.uk/), **which is still a work in progress**.
 
 It is a small utility which runs entirely in your browser for converting Grafana's [Dashboard JSON model](https://grafana.com/docs/grafana/latest/dashboards/json-model/) to a [Datadog dashboard](https://docs.datadoghq.com/dashboards/graphing_json/).
 
