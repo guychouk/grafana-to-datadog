@@ -1,0 +1,7 @@
+{
+  "private": true,
+  "scripts": {
+    "build": "./nob build",
+    "dev": "bunx concurrently -k 'bunx nodemon -w . --ignore \"public/**\" --ignore public --ignore nob --ignore gen --ignore \".git/**\" -e \"*\" -x \"cc -o nob nob.c && ./nob build\"' 'bunx browser-sync start --server public --files \"public/**\" --port 4102 --no-open --no-ui'"
+  }
+}
