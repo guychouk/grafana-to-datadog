@@ -4,6 +4,11 @@
 #include "dev.h"
 
 #define DEV_PORT "4102"
+#define OUT_DIR "./public"
+#define SITE_URL "https://gtd.guycho.uk"
+#define CF_PASS_PREFIX "cloudflare/guycho.uk"
+
+#include "cloudflare.h"
 
 static bool build(void)
 {
@@ -39,7 +44,11 @@ int main(int argc, char **argv) {
         const char *watch[] = {"src", "assets"};
         return dev_serve(DEV_PORT, watch, NOB_ARRAY_LEN(watch), build) ? 0 : 1;
     }
+    if (strcmp(cmd, "purge-cache") == 0) {
+        if (!purge_cache()) return 1;
+        return 0;
+    }
     nob_log(NOB_ERROR, "unknown command: %s", cmd);
-    nob_log(NOB_ERROR, "usage: %s [build|dev|print-public-dir]", program);
+    nob_log(NOB_ERROR, "usage: %s [build|dev|print-public-dir|purge-cache]", program);
     return 1;
 }
