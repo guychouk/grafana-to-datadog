@@ -1,9 +1,11 @@
 // dev.h - the `nob dev` loop for the static sites. Include after nob.h.
 //
-// One child process: browser-sync, which serves ./public and pushes reloads
-// into the open tab. The file watching and rebuilding live here instead of in
-// nodemon, and the process supervision lives here instead of in concurrently,
-// because nob already knows how to spawn processes and compare mtimes.
+// One child process: dev-serve.ts (bun, vendored alongside this file), which
+// serves ./public and pushes reloads into the open tab over SSE. The file
+// watching that triggers a *rebuild* and the process supervision live here
+// instead of in nodemon/concurrently, because nob already knows how to spawn
+// processes and compare mtimes; dev-serve.ts only watches ./public itself to
+// know when to tell the browser to reload.
 
 #ifndef DEV_H_
 #define DEV_H_
@@ -24,7 +26,7 @@ typedef bool (*Dev_Build)(void);
 // Each entry may be a file or a directory; directories are walked recursively,
 // dotfiles skipped. Returns only on failure; SIGINT and SIGTERM tear the child
 // down and exit, which matters under paddock since it signals this pid alone
-// and a leaked browser-sync would sit on the port.
+// and a leaked dev-serve.ts would sit on the port.
 static bool dev_serve(const char *port, const char **watch, size_t watch_count, Dev_Build build);
 
 #endif // DEV_H_
@@ -68,10 +70,10 @@ static time_t dev_latest(const char **watch, size_t watch_count)
     return latest;
 }
 
-// browser-sync does not fail when its --port is taken: it scans forward and
-// quietly binds the next free one, which on this machine means a site serving
-// on its neighbour's port. Check first and refuse instead. SO_REUSEADDR so a
-// TIME_WAIT socket from the previous run does not read as occupied.
+// Check the port before spawning so a busy port is a clear error message
+// instead of an EADDRINUSE stack trace surfacing async from the bun child.
+// SO_REUSEADDR so a TIME_WAIT socket from the previous run does not read as
+// occupied.
 static bool dev_port_free(const char *port)
 {
     int fd = socket(AF_INET6, SOCK_STREAM, 0);
@@ -92,15 +94,13 @@ static bool dev_serve(const char *port, const char **watch, size_t watch_count, 
 {
     if (!dev_port_free(port)) {
         nob_log(NOB_ERROR, "dev: port %s is already in use", port);
-        nob_log(NOB_ERROR, "dev: browser-sync would silently serve on the next free port instead; find the squatter with `lsof -nP -iTCP:%s -sTCP:LISTEN`", port);
+        nob_log(NOB_ERROR, "dev: find the squatter with `lsof -nP -iTCP:%s -sTCP:LISTEN`", port);
         return false;
     }
     if (!build()) return false;
 
     Nob_Cmd cmd = {0};
-    nob_cmd_append(&cmd, "mise", "exec", "--", "bunx", "browser-sync", "start",
-                   "--server", "public", "--files", "public/**",
-                   "--port", port, "--no-open", "--no-ui");
+    nob_cmd_append(&cmd, "mise", "exec", "--", "bun", "dev-serve.ts", "public", port);
     Nob_Proc proc = nob_cmd_run_async_and_reset(&cmd);
     if (proc == NOB_INVALID_PROC) return false;
     dev_child = proc;
@@ -116,7 +116,7 @@ static bool dev_serve(const char *port, const char **watch, size_t watch_count, 
 
         int status;
         if (waitpid(dev_child, &status, WNOHANG) == dev_child) {
-            nob_log(NOB_ERROR, "dev: browser-sync exited");
+            nob_log(NOB_ERROR, "dev: dev-serve.ts exited");
             dev_child = -1;
             return false;
         }
